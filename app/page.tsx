@@ -5,9 +5,10 @@ import { CarCard, CustomFilter, Hero, SearchBar, ShowMore } from '@/components'
 import { fetchCars } from '@/utils'
 import { fuels, yearsOfProduction } from '@/constants';
 import Image from 'next/image';
+import { CarState } from "@/types";
 
 export default function Home() {
-  const [allCars, setAllCars] = useState([]);
+  const [allCars, setAllCars] = useState<CarState>([]);
   const [loading, setLoading] = useState(false);
     
   //search states
@@ -26,11 +27,11 @@ export default function Home() {
 
     try {
       const result = await fetchCars({
-        manufacturer: manufacturer || "",
+        manufacturer: manufacturer.toLowerCase() || "",
         year: year || 2022,
-        fuel: fuel || "",
+        fuel: fuel.toLowerCase() || "",
         limit: limit || 10,
-        model: model || "",
+        model: model.toLowerCase() || "",
       });
     
     setAllCars(result);
@@ -69,12 +70,12 @@ export default function Home() {
         {allCars.length > 0 ? (
           <section>
             <div className="home__cars-wrapper">
-              {allCars?.map((car) => (
-              <CarCard car={car} />
+              {allCars?.map((car, index) => (
+              <CarCard key={`car-${index}`} car={car} />
               ))}
             </div>
 
-            (loading && (
+            {loading && (
               <div className="mt-16 w-full flex-centre">
                 <Image
                   src="/loader.svg"
@@ -84,7 +85,7 @@ export default function Home() {
                   className="object-contain"
                   />
               </div>
-            ))
+            )}
 
             <ShowMore
               pageNumber={limit / 10}
@@ -93,10 +94,12 @@ export default function Home() {
             />
           </section>
         ): (
+          !loading && (
           <div className="home__error-container">
             <h2 className="text-black text-xl font-bold">Oops no results</h2>
             <p>{allCars?.message}</p>
           </div>
+          )
         )}
 
       </div>
